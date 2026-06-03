@@ -1,0 +1,146 @@
+# Proyecto Final
+
+## 1. Descarga y Preparación de Datos
+
+El proyecto cuenta con scripts automatizados para descargar y descomprimir el conjunto de datos de Influenza/COVID-19 de la Secretaría de Salud de México de forma rápida y limpia. El URL del recurso se gestiona desde [data/url.txt](file:///Users/toporaku/code/dwdm/proyecto-final/data/url.txt).
+
+### Ejecución en macOS y Linux (Bash)
+Asegúrate de que el script tenga permisos de ejecución y luego córrelo desde la raíz del proyecto:
+```bash
+chmod +x src/scripts/download_data.sh
+./src/scripts/download_data.sh [directorio_de_salida]
+```
+*Si no se especifica el `directorio_de_salida`, los datos se descargarán y extraerán por defecto en `data/`.*
+
+### Ejecución en Windows (PowerShell)
+Ejecuta el script desde una consola de PowerShell en la raíz del proyecto:
+```powershell
+.\src\scripts\download_data.ps1 -OutputDir "data"
+```
+*El parámetro `-OutputDir` es opcional y por defecto apunta a `data/`.*
+
+Ambos scripts se encargan de:
+1. Leer de forma limpia el URL de [data/url.txt](file:///Users/toporaku/code/dwdm/proyecto-final/data/url.txt).
+2. Descargar el archivo `.zip` usando `curl` o `Invoke-WebRequest`.
+3. Extraer el archivo `COVID19MEXICO.csv` directamente en la carpeta de destino (`data/`).
+4. Eliminar el archivo `.zip` temporal para no ocupar espacio innecesario en disco.
+
+---
+
+## 2. Manual de Buenas Prácticas para Desarrolladores
+
+Para mantener el proyecto ordenado, reproducible y listo para producción, todos los desarrolladores deben seguir las siguientes directrices estructurales:
+
+### 2.1 Código Fuente y Utilidades (`src/`)
+**Regla:** Queda estrictamente prohibido definir funciones auxiliares complejas, algoritmos de minería de datos, utilidades de carga de datos o funciones de preprocesamiento directamente en las celdas de los notebooks. Todo este código debe residir en la carpeta `src/` (por ejemplo, en `src/utils.py`, `src/features.py`, etc.).
+
+#### Cómo importar y referenciar utilidades en los Jupyter Notebooks:
+Debido a que los notebooks están localizados en la carpeta `notebooks/`, se debe añadir la raíz del proyecto al `sys.path` antes de importar módulos de `src`.
+
+Ejemplo de cabecera para un notebook (`notebooks/analisis.ipynb`):
+```python
+import sys
+from pathlib import Path
+
+# Añadir la raíz del proyecto al path
+project_root = Path.cwd().parent
+if str(project_root) not in sys.path:
+    sys.path.append(str(project_root))
+
+# Ahora es posible importar de forma limpia desde la carpeta src
+from src.utils import cargar_datos
+from src.features import preprocesar_comorbilidades
+```
+
+---
+
+### 2.2 Serialización y Guardado de Modelos (`models/`)
+**Regla:** Los modelos entrenados en los notebooks (árboles de decisión, reglas de asociación, clasificadores, etc.) no deben re-entrenarse cada vez que se ejecute la visualización o generación de reportes. Estos deben ser serializados (guardados en disco) en la carpeta `models/`.
+
+#### Cómo serializar modelos en un Jupyter Notebook:
+Se recomienda usar la librería `joblib` para modelos de Scikit-Learn y arrays de NumPy grandes, o `pickle` para estructuras genéricas de Python.
+
+##### Ejemplo de guardado (Serialización):
+```python
+import joblib
+from pathlib import Path
+
+# Instanciar y entrenar el modelo
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Definir la ruta de guardado en la carpeta models/
+models_dir = Path.cwd().parent / "models"
+models_dir.mkdir(exist_ok=True)
+model_path = models_dir / "random_forest_v1.joblib"
+
+# Guardar el modelo en disco
+joblib.dump(model, model_path)
+print(f"Modelo guardado exitosamente en: {model_path}")
+```
+
+##### Ejemplo de carga (Deserialización):
+```python
+import joblib
+from pathlib import Path
+
+# Ruta del modelo
+model_path = Path.cwd().parent / "models" / "random_forest_v1.joblib"
+
+# Cargar el modelo guardado
+loaded_model = joblib.load(model_path)
+
+# Usar el modelo cargado para realizar predicciones
+predictions = loaded_model.predict(X_val)
+```
+
+---
+
+### 2.3 Presentación en Quarto (`docs/`)
+**Regla:** La visualización de reportes científicos y páginas web del proyecto se realiza a través de Quarto. Los notebooks de Jupyter en la carpeta `notebooks/` pueden renderizarse directamente o integrarse como "embeds" en los archivos Markdown de Quarto (`.qmd`) ubicados en `docs/` o en la raíz.
+
+#### A. Renderizado directo de Notebooks en la Web de Quarto
+Se pueden listar y renderizar notebooks como páginas web completas dentro del archivo de configuración `_quarto.yml`.
+
+Ejemplo de configuración en `_quarto.yml`:
+```yaml
+website:
+  title: "Proyecto Final"
+  navbar:
+    left:
+      - href: docs/index.qmd
+        text: Home
+      - href: notebooks/01_exploratorio.ipynb
+        text: "Análisis Exploratorio"
+      - href: notebooks/02_modelado.ipynb
+        text: "Modelado Predictivo"
+```
+
+#### B. Embeber celdas o notebooks enteros usando el shortcode `embed`
+Quarto permite incrustar celdas interactivas de código, tablas o gráficos generados en un notebook directamente dentro de un archivo `.qmd` usando el tag `{{< embed >}}`.
+
+##### Ejemplo de archivo `.qmd` (`docs/reporte.qmd`):
+```markdown
+---
+title: "Reporte de Minería de Datos"
+format: html
+---
+
+## Resultados del Modelo de Clasificación
+
+A continuación se muestra la matriz de confusión y la curva ROC generadas directamente en nuestro notebook de modelado:
+
+{{< embed ../notebooks/02_modelado.ipynb#fig-curva-roc >}}
+
+*Nota: La celda del notebook de origen debe contener el tag de etiqueta `#| label: fig-curva-roc` en sus metadatos o comentario inicial.*
+```
+
+##### Requisitos para el embedding en Quarto:
+1. Asegúrate de tener instalado el paquete `jupyter` en tu entorno virtual (`pip install jupyter`).
+2. Configura los metadatos de la celda en el notebook original para que sea referenciable:
+   En la parte superior de la celda de Jupyter:
+   ```python
+   #| label: fig-curva-roc
+   #| fig-cap: "Curva ROC de la clasificación de riesgo en pacientes."
+   # (Tu código de graficación aquí)
+   ```

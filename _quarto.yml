@@ -4,6 +4,7 @@ project:
 
 website:
   title: "Proyecto Final"
+  site-url: "https://dwdmv.github.io/proyecto-final/"
   navbar:
     left:
       - href: index.qmd

@@ -1,0 +1,76 @@
+name: "Tarea del Proyecto"
+description: "Template para crear tareas/issues del proyecto final de minería de datos."
+title: "[TAREA]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Nueva tarea del proyecto
+        Completa los campos a continuación para crear una tarea bien definida.
+
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: Descripción
+      description: "Descripción clara de la tarea a realizar."
+      placeholder: "¿Qué se debe hacer y por qué?"
+    validations:
+      required: true
+
+  - type: input
+    id: notebook
+    attributes:
+      label: Notebook asociado
+      description: "Notebook principal donde se desarrollará esta tarea."
+      placeholder: "notebooks/02_eda.ipynb"
+    validations:
+      required: false
+
+  - type: input
+    id: modulo
+    attributes:
+      label: Módulo src/ asociado
+      description: "Archivo(s) de código fuente relacionados."
+      placeholder: "src/utils/visualization.py"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: colaborador
+    attributes:
+      label: Colaborador responsable
+      description: "¿Quién es el responsable principal de esta tarea?"
+      options:
+        - "A — Infraestructura y Datos"
+        - "B — Análisis Exploratorio"
+        - "C — Modelo Supervisado"
+        - "D — Clustering"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: milestone
+    attributes:
+      label: Milestone
+      description: "¿A qué milestone pertenece?"
+      options:
+        - "M1 — Infraestructura y Preparación de Datos"
+        - "M2 — Análisis Exploratorio de Datos"
+        - "M3 — Modelo Supervisado"
+        - "M4 — Clustering"
+        - "M5 — Entregables Finales"
+    validations:
+      required: true
+
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Criterios de aceptación
+      description: "Lista de criterios que deben cumplirse para cerrar esta tarea."
+      placeholder: |
+        - [ ] Criterio 1
+        - [ ] Criterio 2
+        - [ ] Criterio 3
+    validations:
+      required: true

@@ -13,16 +13,24 @@ execute:
   execute-notebooks: true       # CRITICAL: Forces execution of .ipynb files
 
 website:
-  title: "Proyecto Final"
+  title: "Proyecto Final — Minería de Datos COVID-19"
   site-url: "https://dwdmv.github.io/proyecto-final/"
   navbar:
     left:
       - href: mds/index.qmd
         text: "Inicio"
-      - href: mds/about.qmd
-        text: "Sobre el proyecto"
       - href: mds/PROPUESTA.md
         text: "Propuesta"
+      - href: notebooks/02_eda.ipynb
+        text: "EDA"
+      - href: notebooks/03_modelo_supervisado.ipynb
+        text: "Modelo Supervisado"
+      - href: notebooks/04_clustering.ipynb
+        text: "Clustering"
+      - href: notebooks/05_demo_modelo.ipynb
+        text: "Demo"
+      - href: mds/about.qmd
+        text: "Sobre el Equipo"
 
 format:
   html:

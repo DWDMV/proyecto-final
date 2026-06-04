@@ -31,3 +31,6 @@ _environment.local
 *_cache/
 docs/
 data_raw/
+
+# Local
+local/

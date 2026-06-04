@@ -1,7 +1,37 @@
 ---
-title: "Proyecto Final"
+title: "Proyecto Final — Minería de Datos"
+subtitle: "Estratificación de Riesgo Clínico en Pacientes con Enfermedades Respiratorias Agudas en México"
 ---
 
-This is a Quarto website.
+## Descripción del Proyecto
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+Este proyecto aplica técnicas de minería de datos (aprendizaje supervisado y no supervisado) sobre el dataset de la **Dirección General de Epidemiología (DGE)** para identificar patrones ocultos de multimorbilidad y clasificar el riesgo de severidad clínica en pacientes mexicanos con enfermedades respiratorias agudas (COVID-19 / Influenza).
+
+## Pregunta de Investigación
+
+> ¿Cómo pueden las técnicas de minería de datos identificar patrones ocultos de multimorbilidad y clasificar con precisión el riesgo de mortalidad en pacientes mexicanos, optimizando así la toma de decisiones clínicas?
+
+## Contenido del Sitio
+
+| Sección | Descripción |
+|---|---|
+| [Propuesta](PROPUESTA.md) | Planteamiento del problema, justificación y objetivos |
+| [EDA](../notebooks/02_eda.ipynb) | Análisis Exploratorio de Datos con visualizaciones |
+| [Modelo Supervisado](../notebooks/03_modelo_supervisado.ipynb) | Decision Tree, Random Forest y XGBoost |
+| [Clustering](../notebooks/04_clustering.ipynb) | K-Means y agrupamiento jerárquico |
+| [Demo](../notebooks/05_demo_modelo.ipynb) | Demostración de reutilización del modelo |
+
+## Dataset
+
+**Fuente:** [Datos Abiertos — Dirección General de Epidemiología](https://www.gob.mx/salud/documentos/datos-abiertos-152127)
+
+- **Registros:** ~222,000
+- **Variables:** 42 columnas (demográficas, comorbilidades, desenlace clínico)
+- **Variable objetivo:** `SEVERIDAD` (ordinal: leve → grave → crítico → fallecido)
+
+## Tecnologías
+
+- **Lenguaje:** Python 3.10+
+- **Librerías:** pandas, numpy, scikit-learn, xgboost, matplotlib, seaborn, plotly, mlxtend
+- **Documentación:** Quarto + GitHub Pages
+- **Patrones de diseño:** Pipeline + Factory Method

@@ -1,5 +1,25 @@
 ---
-title: "About"
+title: "Sobre el Equipo"
 ---
 
-About this site
+## Integrantes
+
+| Colaborador | Rol | Área de responsabilidad |
+|---|---|---|
+| **Colaborador A** | Infraestructura y Datos | Carga, limpieza, preprocesamiento, configuración del repositorio |
+| **Colaborador B** | Análisis Exploratorio | EDA, visualizaciones, reglas de asociación |
+| **Colaborador C** | Modelo Supervisado | DT, RF, XGBoost, evaluación, serialización, demo |
+| **Colaborador D** | Clustering | K-Means, agrupamiento jerárquico, perfilado |
+
+## Repositorio
+
+- **GitHub:** [DWDMV/proyecto-final](https://github.com/DWDMV/proyecto-final)
+- **Sitio web:** [dwdmv.github.io/proyecto-final](https://dwdmv.github.io/proyecto-final/)
+
+## Materia
+
+Almacenes y Minería de Datos — Proyecto Final
+
+## Contacto
+
+<!-- TODO: Agregar nombres reales y datos de contacto de los integrantes -->

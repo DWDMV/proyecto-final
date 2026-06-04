@@ -1,23 +1,35 @@
 project:
   type: website
   output-dir: docs
+  resources:
+    - "robots.txt"
+  render: 
+    - "mds/**/*.qmd"
+    - "mds/**/*.md"
+    - "notebooks/**/*.ipynb"
+
+execute:
+  freeze: false                 # Re-computes code scripts on every cloud run
+  execute-notebooks: true       # CRITICAL: Forces execution of .ipynb files
 
 website:
   title: "Proyecto Final"
   site-url: "https://dwdmv.github.io/proyecto-final/"
   navbar:
     left:
-      - href: index.qmd
-        text: Home
-      - about.qmd
+      - href: mds/index.qmd
+        text: "Inicio"
+      - href: mds/about.qmd
+        text: "Sobre el proyecto"
+      - href: mds/PROPUESTA.md
+        text: "Propuesta"
 
 format:
   html:
     theme:
       - cosmo
       - brand
-    css: styles.css
+    css: src/styles/styles.css
     toc: true
-
-
-
+    code-fold: true             # Wraps all Python cells in interactive dropdown toggles
+    code-summary: "View Python Code"

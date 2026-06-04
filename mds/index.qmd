@@ -1,5 +1,5 @@
 ---
-title: ""Proyecto Final""
+title: "Proyecto Final"
 ---
 
 This is a Quarto website.

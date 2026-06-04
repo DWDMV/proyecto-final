@@ -1,6 +1,8 @@
 # Proyecto Final
 
-Los detalles de la propuesta pueden verse en [Propuesta de Investigacion](docs/PROPUESTA.md)
+Los detalles de la propuesta pueden verse en [Propuesta de Investigación](mds/PROPUESTA.md).
+
+Para la organización de tareas, hitos y la asignación de roles de cada colaborador, consulta la [Guía de Desarrollo](dev-guide/README.md).
 
 ## 1. Descarga y Preparación de Datos
 
@@ -34,12 +36,12 @@ Ambos scripts se encargan de:
 Para mantener el proyecto ordenado, reproducible y listo para producción, todos los desarrolladores deben seguir las siguientes directrices estructurales:
 
 ### 2.1 Código Fuente y Utilidades (`src/`)
-**Regla:** Queda estrictamente prohibido definir funciones auxiliares complejas, algoritmos de minería de datos, utilidades de carga de datos o funciones de preprocesamiento directamente en las celdas de los notebooks. Todo este código debe residir en la carpeta `src/` (por ejemplo, en `src/utils.py`, `src/features.py`, etc.).
+**Regla:** Queda estrictamente prohibido definir funciones auxiliares complejas, algoritmos de minería de datos, utilidades de carga de datos o funciones de preprocesamiento directamente en las celdas de los notebooks. Todo este código debe residir en la carpeta `src/` (por capas correspondientes: `data/`, `models/`, `utils/`).
 
 #### Cómo importar y referenciar utilidades en los Jupyter Notebooks:
 Debido a que los notebooks están localizados en la carpeta `notebooks/`, se debe añadir la raíz del proyecto al `sys.path` antes de importar módulos de `src`.
 
-Ejemplo de cabecera para un notebook (`notebooks/analisis.ipynb`):
+Ejemplo de cabecera para un notebook (`notebooks/01_preprocesamiento.ipynb` o similares):
 ```python
 import sys
 from pathlib import Path
@@ -50,99 +52,94 @@ if str(project_root) not in sys.path:
     sys.path.append(str(project_root))
 
 # Ahora es posible importar de forma limpia desde la carpeta src
-from src.utils import cargar_datos
-from src.features import preprocesar_comorbilidades
+from src.data.loader import DataLoader
+from src.data.preprocessor import DataPreprocessor
+from src.utils.constants import RANDOM_STATE
 ```
 
 ---
 
 ### 2.2 Serialización y Guardado de Modelos (`models/`)
-**Regla:** Los modelos entrenados en los notebooks (árboles de decisión, reglas de asociación, clasificadores, etc.) no deben re-entrenarse cada vez que se ejecute la visualización o generación de reportes. Estos deben ser serializados (guardados en disco) en la carpeta `models/`.
+**Regla:** Los modelos entrenados en los notebooks (árboles de decisión, random forest, xgboost, etc.) no deben re-entrenarse cada vez que se ejecute la visualización, la demo o la generación de reportes. Estos deben ser serializados en la carpeta `models/`.
 
 #### Cómo serializar modelos en un Jupyter Notebook:
-Se recomienda usar la librería `joblib` para modelos de Scikit-Learn y arrays de NumPy grandes, o `pickle` para estructuras genéricas de Python.
+Se recomienda usar la librería `joblib` para modelos de Scikit-Learn y XGBoost.
 
 ##### Ejemplo de guardado (Serialización):
 ```python
 import joblib
 from pathlib import Path
 
-# Instanciar y entrenar el modelo
-model = RandomForestClassifier(n_estimators=100, random_state=42)
+# Instanciar y entrenar el modelo (usando la factoría)
+from src.models.factory import ModelFactory
+model = ModelFactory.create_model("random_forest", n_estimators=100)
 model.fit(X_train, y_train)
 
 # Definir la ruta de guardado en la carpeta models/
 models_dir = Path.cwd().parent / "models"
 models_dir.mkdir(exist_ok=True)
-model_path = models_dir / "random_forest_v1.joblib"
+model_path = models_dir / "random_forest.joblib"
 
 # Guardar el modelo en disco
 joblib.dump(model, model_path)
 print(f"Modelo guardado exitosamente en: {model_path}")
 ```
 
-##### Ejemplo de carga (Deserialización):
+##### Ejemplo de carga (Deserialización en `notebooks/05_demo_modelo.ipynb`):
 ```python
 import joblib
 from pathlib import Path
 
 # Ruta del modelo
-model_path = Path.cwd().parent / "models" / "random_forest_v1.joblib"
+model_path = Path.cwd().parent / "models" / "random_forest.joblib"
 
 # Cargar el modelo guardado
 loaded_model = joblib.load(model_path)
 
-# Usar el modelo cargado para realizar predicciones
-predictions = loaded_model.predict(X_val)
+# Usar el modelo cargado para realizar predicciones con nuevos datos
+predictions = loaded_model.predict(X_new)
 ```
 
 ---
 
-### 2.3 Presentación en Quarto (`docs/`)
-**Regla:** La visualización de reportes científicos y páginas web del proyecto se realiza a través de Quarto. Los notebooks de Jupyter en la carpeta `notebooks/` pueden renderizarse directamente o integrarse como "embeds" en los archivos Markdown de Quarto (`.qmd`) ubicados en `docs/` o en la raíz.
+### 2.3 Presentación en Quarto (`mds/` y `_quarto.yml`)
+**Regla:** La visualización del reporte técnico y de las páginas del sitio web se realiza con Quarto. El código fuente y páginas estáticas residen en `mds/` (como `index.qmd` y `about.qmd`), mientras que los notebooks en `notebooks/` se renderizan de forma integrada o mediante shortcodes de Quarto.
 
 #### A. Renderizado directo de Notebooks en la Web de Quarto
-Se pueden listar y renderizar notebooks como páginas web completas dentro del archivo de configuración `_quarto.yml`.
+Los notebooks están enlazados en el menú de navegación dentro de `_quarto.yml`.
 
 Ejemplo de configuración en `_quarto.yml`:
 ```yaml
 website:
-  title: "Proyecto Final"
+  title: "Minería de Datos - COVID19/Influenza"
   navbar:
     left:
-      - href: docs/index.qmd
-        text: Home
-      - href: notebooks/01_exploratorio.ipynb
-        text: "Análisis Exploratorio"
-      - href: notebooks/02_modelado.ipynb
-        text: "Modelado Predictivo"
+      - href: mds/index.qmd
+        text: "Inicio"
+      - href: notebooks/01_preprocesamiento.ipynb
+        text: "Preprocesamiento"
+      - href: notebooks/02_eda.ipynb
+        text: "EDA"
 ```
 
-#### B. Embeber celdas o notebooks enteros usando el shortcode `embed`
-Quarto permite incrustar celdas interactivas de código, tablas o gráficos generados en un notebook directamente dentro de un archivo `.qmd` usando el tag `{{< embed >}}`.
+#### B. Embeber celdas utilizando el shortcode `embed`
+Quarto permite incrustar gráficos, tablas y métricas calculadas en un notebook dentro de un archivo `.qmd` usando `{{< embed >}}`.
 
-##### Ejemplo de archivo `.qmd` (`docs/reporte.qmd`):
+##### Ejemplo de archivo `.qmd` (`mds/index.qmd`):
 ```markdown
----
-title: "Reporte de Minería de Datos"
-format: html
----
+## Resultados de la Clasificación
 
-## Resultados del Modelo de Clasificación
+A continuación se muestra la curva ROC generada en el notebook de modelado:
 
-A continuación se muestra la matriz de confusión y la curva ROC generadas directamente en nuestro notebook de modelado:
-
-{{< embed ../notebooks/02_modelado.ipynb#fig-curva-roc >}}
-
-*Nota: La celda del notebook de origen debe contener el tag de etiqueta `#| label: fig-curva-roc` en sus metadatos o comentario inicial.*
+{{< embed ../notebooks/03_modelo_supervisado.ipynb#fig-curva-roc >}}
 ```
 
 ##### Requisitos para el embedding en Quarto:
-1. Asegúrate de tener instalado el paquete `jupyter` en tu entorno virtual (`pip install jupyter`).
-2. Configura los metadatos de la celda en el notebook original para que sea referenciable:
-   En la parte superior de la celda de Jupyter:
+1. El notebook de origen debe tener declaradas las celdas referenciables agregando el tag al principio de la celda de código:
    ```python
    #| label: fig-curva-roc
-   #| fig-cap: "Curva ROC de la clasificación de riesgo en pacientes."
+   #| fig-cap: "Curva ROC de la clasificación de severidad."
    # (Tu código de graficación aquí)
    ```
+2. Recuerda que para ejecutar las compilaciones locales se debe usar `quarto render` o `quarto preview`.
+

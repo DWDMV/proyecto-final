@@ -1,8 +1,10 @@
 # Proyecto Final
 
+Los detalles de la propuesta pueden verse en [Propuesta de Investigacion](docs/PROPUESTA.md)
+
 ## 1. Descarga y Preparación de Datos
 
-El proyecto cuenta con scripts automatizados para descargar y descomprimir el conjunto de datos de Influenza/COVID-19 de la Secretaría de Salud de México de forma rápida y limpia. El URL del recurso se gestiona desde [data/url.txt](file:///Users/toporaku/code/dwdm/proyecto-final/data/url.txt).
+El proyecto cuenta con scripts automatizados para descargar y descomprimir el conjunto de datos de Influenza/COVID-19 de la Secretaría de Salud de México de forma rápida y limpia. El URL del recurso se gestiona desde [data/url.txt](data/url.txt).
 
 ### Ejecución en macOS y Linux (Bash)
 Asegúrate de que el script tenga permisos de ejecución y luego córrelo desde la raíz del proyecto:

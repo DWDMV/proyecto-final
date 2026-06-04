@@ -21,6 +21,8 @@ website:
         text: "Inicio"
       - href: mds/PROPUESTA.md
         text: "Propuesta"
+      - href: notebooks/01_preprocesamiento.ipynb
+        text: "Preprocesamiento de datos"
       - href: notebooks/02_eda.ipynb
         text: "EDA"
       - href: notebooks/03_modelo_supervisado.ipynb

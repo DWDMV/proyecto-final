@@ -19,7 +19,7 @@ RANDOM_STATE: int = 42
 # ---------------------------------------------------------------------------
 PROJECT_ROOT: Path = Path(__file__).resolve().parents[2]
 
-DATA_RAW_PATH: Path = PROJECT_ROOT / "data_raw"
+DATA_RAW_PATH: Path = PROJECT_ROOT / "data"
 DATA_CLEAN_PATH: Path = PROJECT_ROOT / "data"
 MODELS_PATH: Path = PROJECT_ROOT / "models"
 REPORTS_PATH: Path = PROJECT_ROOT / "reports"
@@ -60,7 +60,7 @@ COLS_DEMOGRAFICAS: list[str] = [
 COLS_DESENLACE: list[str] = [
     "TIPO_PACIENTE",
     "INTUBADO",
-    "UCI",
+    "UCI", #Unidad de Cuidados Intensivos
     "FECHA_DEF",
     "NEUMONIA",
 ]

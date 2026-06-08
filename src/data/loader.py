@@ -58,22 +58,43 @@ class DataLoader:
         FileNotFoundError
             Si el archivo CSV no existe en la ruta especificada.
         """
-        # TODO: Implementar carga del CSV con tipos de datos optimizados
-        raise NotImplementedError("Implementar carga del CSV")
+        if not self.filepath.exists():
+            raise FileNotFoundError(f"No se encontró el archivo: {self.filepath}")
+        self.df = pd.read_csv(self.filepath, encoding="latin-1", low_memory=False)
+        self.df.columns = self.df.columns.str.strip()
+        return self.df
 
     def resumen_calidad(self) -> pd.DataFrame:
         """Genera un resumen de calidad de datos por columna.
 
         Incluye: tipo de dato, conteo de nulos, porcentaje de nulos,
-        valores únicos.
+        valores únicos y conteo de códigos especiales (97, 98, 99).
 
         Returns
         -------
         pd.DataFrame
             Tabla resumen de calidad.
         """
-        # TODO: Implementar resumen de calidad
-        raise NotImplementedError("Implementar resumen de calidad")
+        if self.df is None:
+            raise RuntimeError("Ejecuta load() antes de llamar a resumen_calidad()")
+        rows = []
+        for col in self.df.columns:
+            nulos = int(self.df[col].isna().sum())
+            especiales = int(
+                self.df[col].astype(str).str.strip().isin(["97", "98", "99"]).sum()
+            )
+            rows.append(
+                {
+                    "columna": col,
+                    "tipo": str(self.df[col].dtype),
+                    "nulos": nulos,
+                    "pct_nulos": f"{nulos / len(self.df) * 100:.2f}",
+                    "codigos_especiales": especiales,
+                    "pct_especiales": f"{especiales / len(self.df) * 100:.2f}",
+                    "valores_unicos": self.df[col].nunique(),
+                }
+            )
+        return pd.DataFrame(rows)
 
     def detectar_duplicados(self) -> int:
         """Identifica y cuenta registros duplicados.
@@ -83,8 +104,11 @@ class DataLoader:
         int
             Número de filas duplicadas encontradas.
         """
-        # TODO: Implementar detección de duplicados
-        raise NotImplementedError("Implementar detección de duplicados")
+        if self.df is None:
+            raise RuntimeError("Ejecuta load() antes de llamar a detectar_duplicados()")
+        n = int(self.df.duplicated().sum())
+        print(f"Registros duplicados: {n} ({n / len(self.df) * 100:.2f}%)")
+        return n
 
     def descripcion_general(self) -> dict:
         """Retorna un diccionario con metadatos generales del dataset.
@@ -94,5 +118,17 @@ class DataLoader:
         dict
             Claves: 'filas', 'columnas', 'tipos', 'memoria_mb'.
         """
-        # TODO: Implementar descripción general
-        raise NotImplementedError("Implementar descripción general")
+        if self.df is None:
+            raise RuntimeError("Ejecuta load() antes de llamar a descripcion_general()")
+        info = {
+            "filas": self.df.shape[0],
+            "columnas": self.df.shape[1],
+            "tipos": {str(k): int(v) for k, v in self.df.dtypes.value_counts().items()},
+            "memoria_mb": round(self.df.memory_usage(deep=True).sum() / 1024**2, 2),
+        }
+        print(f"Filas     : {info['filas']:,}")
+        print(f"Columnas  : {info['columnas']}")
+        print(f"Memoria   : {info['memoria_mb']} MB")
+        for dtype, count in info["tipos"].items():
+            print(f"  {dtype}: {count} col(s)")
+        return info

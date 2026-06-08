@@ -6,10 +6,10 @@ title: "Sobre el Equipo"
 
 | Colaborador | Rol | Área de responsabilidad |
 |---|---|---|
-| **Colaborador A** | Infraestructura y Datos | Carga, limpieza, preprocesamiento, configuración del repositorio |
-| **Colaborador B** | Análisis Exploratorio | EDA, visualizaciones, reglas de asociación |
-| **Colaborador C** | Modelo Supervisado | DT, RF, XGBoost, evaluación, serialización, demo |
-| **Colaborador D** | Clustering | K-Means, agrupamiento jerárquico, perfilado |
+| **Zianya Nenetzi Trujillo Beltran** | Infraestructura y Datos | Carga, limpieza, preprocesamiento, configuración del repositorio |
+| **Paola Mildred Martínez Hidalgo** | Análisis Exploratorio | EDA, visualizaciones, reglas de asociación |
+| **Eric Toporek Coca** | Modelo Supervisado | DT, RF, XGBoost, evaluación, serialización, demo |
+| **José Eduardo Cruz Campos** | Clustering | K-Means, agrupamiento jerárquico, perfilado |
 
 ## Repositorio
 
@@ -19,7 +19,3 @@ title: "Sobre el Equipo"
 ## Materia
 
 Almacenes y Minería de Datos — Proyecto Final
-
-## Contacto
-
-<!-- TODO: Agregar nombres reales y datos de contacto de los integrantes -->

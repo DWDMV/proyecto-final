@@ -16,6 +16,7 @@ Este proyecto aplica técnicas de minería de datos (aprendizaje supervisado y n
 | Sección | Descripción |
 |---|---|
 | [Propuesta](PROPUESTA.md) | Planteamiento del problema, justificación y objetivos |
+| [Preprocesamiennto De Datos](../notebooks/01_preprocesamiento.ipynb) | Limpieza y preparación de datos |
 | [EDA](../notebooks/02_eda.ipynb) | Análisis Exploratorio de Datos con visualizaciones |
 | [Modelo Supervisado](../notebooks/03_modelo_supervisado.ipynb) | Decision Tree, Random Forest y XGBoost |
 | [Clustering](../notebooks/04_clustering.ipynb) | K-Means y agrupamiento jerárquico |

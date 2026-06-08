@@ -1,0 +1,1 @@
+https://huggingface.co/toporaku/covid19mexico-models/resolve/main/

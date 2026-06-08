@@ -34,3 +34,7 @@ data_raw/
 
 # Local
 local/
+
+# Models (persisted binary files)
+models/*.joblib
+models/*.zip

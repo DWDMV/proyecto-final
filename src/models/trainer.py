@@ -12,8 +12,9 @@ Colaborador responsable: C (Modelo Supervisado)
 import pandas as pd
 import numpy as np
 from typing import Any, Optional
+import joblib
 
-from src.utils.constants import RANDOM_STATE
+from src.utils.constants import RANDOM_STATE, MODELS_PATH
 
 
 class ModelTrainer:
@@ -56,13 +57,19 @@ class ModelTrainer:
         -------
         Modelo entrenado.
         """
-        # TODO: Implementar entrenamiento del modelo
-        raise NotImplementedError("Implementar entrenamiento")
+        # Si es XGBClassifier, calculamos e inyectamos los pesos de clase mediante sample_weight
+        if type(modelo).__name__ == "XGBClassifier":
+            from sklearn.utils.class_weight import compute_sample_weight
+            sample_weight = compute_sample_weight(class_weight="balanced", y=y_train)
+            modelo.fit(X_train, y_train, sample_weight=sample_weight)
+        else:
+            modelo.fit(X_train, y_train)
+        return modelo
 
     def validacion_cruzada(
         self, modelo: Any, X: pd.DataFrame, y: pd.Series, cv: int = 5
     ) -> dict:
-        """Ejecuta validación cruzada estratificada.
+        """Ejecuta validación cruzada estratificada con soporte para pesos de clase.
 
         Parameters
         ----------
@@ -77,8 +84,48 @@ class ModelTrainer:
         dict
             Métricas promedio por fold.
         """
-        # TODO: Implementar cross-validation con StratifiedKFold
-        raise NotImplementedError("Implementar validación cruzada")
+        from sklearn.model_selection import StratifiedKFold
+        from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+        from sklearn.utils.class_weight import compute_sample_weight
+        from sklearn.base import clone
+
+        skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=self.random_state)
+        
+        metrics = {
+            "accuracy": [],
+            "precision_macro": [],
+            "recall_macro": [],
+            "f1_macro": [],
+            "f1_weighted": []
+        }
+
+        for train_idx, val_idx in skf.split(X, y):
+            X_train_fold = X.iloc[train_idx]
+            y_train_fold = y.iloc[train_idx]
+            X_val_fold = X.iloc[val_idx]
+            y_val_fold = y.iloc[val_idx]
+
+            # Clonar el modelo para garantizar un entrenamiento limpio por fold
+            model_fold = clone(modelo)
+
+            if type(model_fold).__name__ == "XGBClassifier":
+                sw = compute_sample_weight(class_weight="balanced", y=y_train_fold)
+                model_fold.fit(X_train_fold, y_train_fold, sample_weight=sw)
+            else:
+                model_fold.fit(X_train_fold, y_train_fold)
+
+            preds = model_fold.predict(X_val_fold)
+            
+            metrics["accuracy"].append(accuracy_score(y_val_fold, preds))
+            metrics["precision_macro"].append(precision_score(y_val_fold, preds, average="macro", zero_division=0))
+            metrics["recall_macro"].append(recall_score(y_val_fold, preds, average="macro", zero_division=0))
+            metrics["f1_macro"].append(f1_score(y_val_fold, preds, average="macro", zero_division=0))
+            metrics["f1_weighted"].append(f1_score(y_val_fold, preds, average="weighted", zero_division=0))
+
+        # Promediar métricas
+        cv_results = {k: float(np.mean(v)) for k, v in metrics.items()}
+        self.cv_results = cv_results
+        return cv_results
 
     def busqueda_hiperparametros(
         self,
@@ -88,7 +135,7 @@ class ModelTrainer:
         y_train: pd.Series,
         cv: int = 5,
     ) -> Any:
-        """Búsqueda de hiperparámetros con GridSearchCV o RandomizedSearchCV.
+        """Búsqueda de hiperparámetros con RandomizedSearchCV optimizando f1_macro.
 
         Parameters
         ----------
@@ -103,8 +150,27 @@ class ModelTrainer:
         -------
         Mejor modelo encontrado.
         """
-        # TODO: Implementar búsqueda de hiperparámetros
-        raise NotImplementedError("Implementar búsqueda de hiperparámetros")
+        from sklearn.model_selection import RandomizedSearchCV
+
+        fit_params = {}
+        if type(modelo).__name__ == "XGBClassifier":
+            from sklearn.utils.class_weight import compute_sample_weight
+            sw = compute_sample_weight(class_weight="balanced", y=y_train)
+            fit_params["sample_weight"] = sw
+
+        search = RandomizedSearchCV(
+            estimator=modelo,
+            param_distributions=param_grid,
+            n_iter=10,
+            scoring="f1_macro",
+            cv=cv,
+            random_state=self.random_state,
+            n_jobs=-1,
+        )
+        search.fit(X_train, y_train, **fit_params)
+        
+        self.best_params = search.best_params_
+        return search.best_estimator_
 
     def serializar_modelo(self, modelo: Any, nombre: str) -> None:
         """Serializa el modelo entrenado con joblib.
@@ -115,5 +181,7 @@ class ModelTrainer:
         nombre : str
             Nombre del archivo (sin extensión).
         """
-        # TODO: Guardar modelo en MODELS_PATH con joblib.dump
-        raise NotImplementedError("Implementar serialización de modelo")
+        MODELS_PATH.mkdir(parents=True, exist_ok=True)
+        filepath = MODELS_PATH / f"{nombre}.joblib"
+        joblib.dump(modelo, filepath)
+        print(f"Modelo guardado en: {filepath}")

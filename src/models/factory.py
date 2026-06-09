@@ -58,8 +58,33 @@ class ModelFactory:
         ValueError
             Si ``tipo`` no está en los modelos soportados.
         """
-        # TODO: Implementar creación de modelos con parámetros por defecto
-        raise NotImplementedError(f"Implementar creación de modelo '{tipo}'")
+        if tipo not in self._MODELOS_SOPORTADOS:
+            raise ValueError(
+                f"Modelo '{tipo}' no soportado. Modelos válidos: {self.listar_modelos()}"
+            )
+
+        from sklearn.tree import DecisionTreeClassifier
+        from sklearn.ensemble import RandomForestClassifier
+        from xgboost import XGBClassifier
+
+        # Configuración por defecto
+        params = {"random_state": self.random_state}
+        params.update(kwargs)
+
+        if tipo == "dt":
+            if "class_weight" not in params:
+                params["class_weight"] = "balanced"
+            return DecisionTreeClassifier(**params)
+
+        elif tipo == "rf":
+            if "class_weight" not in params:
+                params["class_weight"] = "balanced"
+            return RandomForestClassifier(**params)
+
+        elif tipo == "xgb":
+            if "tree_method" not in params:
+                params["tree_method"] = "hist"
+            return XGBClassifier(**params)
 
     def listar_modelos(self) -> list[str]:
         """Retorna los tipos de modelos soportados.

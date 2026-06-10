@@ -60,7 +60,7 @@ class DataLoader:
         """
         if not self.filepath.exists():
             raise FileNotFoundError(f"No se encontró el archivo: {self.filepath}")
-        self.df = pd.read_csv(self.filepath, encoding="latin-1", low_memory=False)
+        self.df = pd.read_csv(self.filepath, encoding="utf-8", low_memory=False)
         self.df.columns = self.df.columns.str.strip()
         return self.df
 

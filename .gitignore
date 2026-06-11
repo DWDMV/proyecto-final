@@ -38,3 +38,5 @@ local/
 # Models (persisted binary files)
 models/*.joblib
 models/*.zip
+
+src/tex/

@@ -31,115 +31,87 @@ Ambos scripts se encargan de:
 
 ---
 
-## 2. Manual de Buenas Prácticas para Desarrolladores
+## 2. Instalación y Ejecución del Proyecto
 
-Para mantener el proyecto ordenado, reproducible y listo para producción, todos los desarrolladores deben seguir las siguientes directrices estructurales:
+Sigue estos pasos para configurar y ejecutar el proyecto en tu entorno local:
 
-### 2.1 Código Fuente y Utilidades (`src/`)
-**Regla:** Queda estrictamente prohibido definir funciones auxiliares complejas, algoritmos de minería de datos, utilidades de carga de datos o funciones de preprocesamiento directamente en las celdas de los notebooks. Todo este código debe residir en la carpeta `src/` (por capas correspondientes: `data/`, `models/`, `utils/`).
+### 2.1 Requisitos Previos
 
-#### Cómo importar y referenciar utilidades en los Jupyter Notebooks:
-Debido a que los notebooks están localizados en la carpeta `notebooks/`, se debe añadir la raíz del proyecto al `sys.path` antes de importar módulos de `src`.
+- **Python**: Versión 3.10 o superior.
+- **Quarto**: Opcional, necesario únicamente si deseas compilar o previsualizar el sitio web localmente.
 
-Ejemplo de cabecera para un notebook (`notebooks/01_preprocesamiento.ipynb` o similares):
-```python
-import sys
-from pathlib import Path
+### 2.2 Configuración del Entorno
 
-# Añadir la raíz del proyecto al path
-project_root = Path.cwd().parent
-if str(project_root) not in sys.path:
-    sys.path.append(str(project_root))
-
-# Ahora es posible importar de forma limpia desde la carpeta src
-from src.data.loader import DataLoader
-from src.data.preprocessor import DataPreprocessor
-from src.utils.constants import RANDOM_STATE
-```
-
----
-
-### 2.2 Serialización y Guardado de Modelos (`models/`)
-**Regla:** Los modelos entrenados en los notebooks (árboles de decisión, random forest, xgboost, etc.) no deben re-entrenarse cada vez que se ejecute la visualización, la demo o la generación de reportes. Estos deben ser serializados en la carpeta `models/`.
-
-#### Cómo serializar modelos en un Jupyter Notebook:
-Se recomienda usar la librería `joblib` para modelos de Scikit-Learn y XGBoost.
-
-##### Ejemplo de guardado (Serialización):
-```python
-import joblib
-from pathlib import Path
-
-# Instanciar y entrenar el modelo (usando la factoría)
-from src.models.factory import ModelFactory
-model = ModelFactory.create_model("random_forest", n_estimators=100)
-model.fit(X_train, y_train)
-
-# Definir la ruta de guardado en la carpeta models/
-models_dir = Path.cwd().parent / "models"
-models_dir.mkdir(exist_ok=True)
-model_path = models_dir / "random_forest.joblib"
-
-# Guardar el modelo en disco
-joblib.dump(model, model_path)
-print(f"Modelo guardado exitosamente en: {model_path}")
-```
-
-##### Ejemplo de carga (Deserialización en `notebooks/05_demo_modelo.ipynb`):
-```python
-import joblib
-from pathlib import Path
-
-# Ruta del modelo
-model_path = Path.cwd().parent / "models" / "random_forest.joblib"
-
-# Cargar el modelo guardado
-loaded_model = joblib.load(model_path)
-
-# Usar el modelo cargado para realizar predicciones con nuevos datos
-predictions = loaded_model.predict(X_new)
-```
-
----
-
-### 2.3 Presentación en Quarto (`mds/` y `_quarto.yml`)
-**Regla:** La visualización del reporte técnico y de las páginas del sitio web se realiza con Quarto. El código fuente y páginas estáticas residen en `mds/` (como `index.qmd` y `about.qmd`), mientras que los notebooks en `notebooks/` se renderizan de forma integrada o mediante shortcodes de Quarto.
-
-#### A. Renderizado directo de Notebooks en la Web de Quarto
-Los notebooks están enlazados en el menú de navegación dentro de `_quarto.yml`.
-
-Ejemplo de configuración en `_quarto.yml`:
-```yaml
-website:
-  title: "Minería de Datos - COVID19/Influenza"
-  navbar:
-    left:
-      - href: mds/index.qmd
-        text: "Inicio"
-      - href: notebooks/01_preprocesamiento.ipynb
-        text: "Preprocesamiento"
-      - href: notebooks/02_eda.ipynb
-        text: "EDA"
-```
-
-#### B. Embeber celdas utilizando el shortcode `embed`
-Quarto permite incrustar gráficos, tablas y métricas calculadas en un notebook dentro de un archivo `.qmd` usando `{{< embed >}}`.
-
-##### Ejemplo de archivo `.qmd` (`mds/index.qmd`):
-```markdown
-## Resultados de la Clasificación
-
-A continuación se muestra la curva ROC generada en el notebook de modelado:
-
-{{< embed ../notebooks/03_modelo_supervisado.ipynb#fig-curva-roc >}}
-```
-
-##### Requisitos para el embedding en Quarto:
-1. El notebook de origen debe tener declaradas las celdas referenciables agregando el tag al principio de la celda de código:
-   ```python
-   #| label: fig-curva-roc
-   #| fig-cap: "Curva ROC de la clasificación de severidad."
-   # (Tu código de graficación aquí)
+1. **Clonar el repositorio:**
+   ```bash
+   git clone <url-del-repositorio>
+   cd proyecto-final
    ```
-2. Recuerda que para ejecutar las compilaciones locales se debe usar `quarto render` o `quarto preview`.
+
+2. **Crear y activar un entorno virtual:**
+   - En macOS y Linux:
+     ```bash
+     python3 -m venv .venv
+     source .venv/bin/activate
+     ```
+   - En Windows:
+     ```powershell
+     python -m venv .venv
+     .\.venv\Scripts\Activate.ps1
+     ```
+
+3. **Instalar dependencias:**
+   - Usando `pip` estándar:
+     ```bash
+     pip install -r requirements.txt
+     ```
+   - Usando `uv` (recomendado por velocidad):
+     ```bash
+     uv pip install -r requirements.txt
+     ```
+
+---
+
+### 2.3 Modelos en Hugging Face (Importante)
+
+Para evitar entrenar los modelos pesados desde cero en cada ejecución, el proyecto utiliza modelos serializados pre-entrenados (Decision Tree, Random Forest y XGBoost). 
+
+> [!IMPORTANT]
+> **Alojamiento en Hugging Face:**
+> Todos los modelos serializados (`.joblib`) están publicados en el siguiente repositorio de Hugging Face:
+> [Hugging Face — covid19mexico-models](https://huggingface.co/toporaku/covid19mexico-models)
+> 
+> La URL de descarga se gestiona desde [models/url.txt](models/url.txt).
+
+**Carga automática:**
+El notebook [05_demo_modelo.ipynb](notebooks/05_demo_modelo.ipynb) y el código del pipeline de inferencia están diseñados para verificar si los modelos existen localmente en la carpeta `models/`. Si no existen, **se descargarán automáticamente** desde Hugging Face usando la URL base configurada.
+
+---
+
+### 2.4 Ejecución de Notebooks y Código
+
+Para explorar el análisis y correr los modelos:
+
+1. Inicia Jupyter Lab o Notebook:
+   ```bash
+   jupyter lab
+   ```
+2. Abre y ejecuta los notebooks en orden secuencial dentro de la carpeta `notebooks/`.
+
+---
+
+### 2.5 Compilación de la Documentación (Quarto)
+
+Para previsualizar localmente el sitio de Quarto con toda la documentación y reportes integrados:
+
+```bash
+quarto preview
+```
+
+Para generar la versión estática de producción en la carpeta `docs/`:
+
+```bash
+quarto render
+```
+
 

@@ -1,0 +1,106 @@
+---
+title: "Guía de Instalación y Uso"
+subtitle: "Instrucciones de configuración, ejecución de scripts y modelos pre-entrenados"
+---
+
+Esta guía proporciona las instrucciones detalladas para instalar el entorno del proyecto, descargar los datos fuente y utilizar los modelos predictivos pre-entrenados alojados en Hugging Face.
+
+## 1. Requisitos Previos
+
+Asegúrate de contar con los siguientes elementos instalados en tu sistema:
+- **Python 3.10+**
+- **Git**
+- **Quarto** (para previsualizar o compilar este sitio web localmente)
+
+---
+
+## 2. Configuración del Entorno de Desarrollo
+
+Clona el repositorio e instala las dependencias necesarias. Se recomienda utilizar la herramienta `uv` para acelerar la instalación de librerías en Python.
+
+### Paso 1: Clonar el Repositorio
+```bash
+git clone <url-del-repositorio>
+cd proyecto-final
+```
+
+### Paso 2: Crear y Activar el Entorno Virtual
+- **macOS / Linux:**
+  ```bash
+  python3 -m venv .venv
+  source .venv/bin/activate
+  ```
+- **Windows (PowerShell):**
+  ```powershell
+  python -m venv .venv
+  .\.venv\Scripts\Activate.ps1
+  ```
+
+### Paso 3: Instalar Dependencias
+- Con **uv** (Recomendado):
+  ```bash
+  uv pip install -r requirements.txt
+  ```
+- Con **pip** estándar:
+  ```bash
+  pip install -r requirements.txt
+  ```
+
+---
+
+## 3. Descarga y Preparación del Dataset
+
+El dataset original proviene de la Dirección General de Epidemiología de México. El proyecto incluye scripts que automatizan la descarga y descompresión limpia de los datos.
+
+### Ejecución en macOS y Linux:
+```bash
+chmod +x src/scripts/download_data.sh
+./src/scripts/download_data.sh
+```
+
+### Ejecución en Windows (PowerShell):
+```powershell
+.\src/scripts/download_data.ps1 -OutputDir "data"
+```
+
+---
+
+## 4. Modelos Serializados en Hugging Face
+
+Para asegurar la reproducibilidad y rapidez en la ejecución de las demostraciones y reportes sin necesidad de volver a entrenar modelos pesados, los artefactos finales se encuentran alojados en la nube.
+
+::: {.callout-important}
+### Modelos Alojados en Hugging Face
+Los modelos predictivos del proyecto (**Decision Tree**, **Random Forest** y **XGBoost**) están almacenados públicamente en Hugging Face:
+
+[Hugging Face Repo — covid19mexico-models](https://huggingface.co/toporaku/covid19mexico-models)
+
+La dirección base para la descarga directa está definida en el archivo `models/url.txt`.
+:::
+
+### Carga Dinámica Automática
+El pipeline de inferencia implementado en el notebook [05 — Demostración de Reutilización del Modelo](../notebooks/05_demo_modelo.ipynb) verifica de manera automática la existencia local de los archivos en la carpeta `models/`. 
+
+Si los archivos no son encontrados, **el sistema los descargará de manera transparente desde el repositorio de Hugging Face** antes de proceder con las predicciones:
+
+- `decision_tree.joblib`
+- `random_forest.joblib`
+- `xgboost_model.joblib`
+- `features.joblib`
+- `preprocessor.joblib`
+
+---
+
+## 5. Visualización del Sitio en Quarto (Local)
+
+Si deseas previsualizar este sitio web de Quarto de manera interactiva en tu navegador local, ejecuta:
+
+```bash
+quarto preview
+```
+
+Para realizar una compilación limpia de producción en la carpeta `docs/`, ejecuta:
+
+```bash
+quarto render
+```

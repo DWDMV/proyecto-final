@@ -22,6 +22,8 @@ website:
         text: "Inicio"
       - href: mds/PROPUESTA.md
         text: "Propuesta"
+      - href: mds/instrucciones.qmd
+        text: "Instalación y Uso"
       - href: notebooks/01_preprocesamiento.ipynb
         text: "Preprocesamiento de datos"
       - href: notebooks/02_eda.ipynb
